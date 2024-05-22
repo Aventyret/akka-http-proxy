@@ -1,0 +1,14 @@
+
+tls:
+  certificates:
+    - certFile: /cert/akka-crt.pem
+      keyFile: /cert/akka-key.pem
+      stores:
+        - default
+
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /cert/akka-crt.pem
+        keyFile: /cert/akka-key.pem
+  
