@@ -5,7 +5,7 @@ networks:
 services:
 
   proxy:
-    image: traefik:v2.9
+    image: traefik:v3.1
     container_name: akka-proxy
     restart: always
     command:
@@ -14,6 +14,7 @@ services:
       - --log.level=DEBUG
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
       - --providers.docker=true
       - --providers.file.directory=/config
       - --providers.file.watch=true
@@ -32,28 +33,6 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./src:/config/
-      - .user/cert:/cert/
+      - ~/.akka/cert:/cert/
     networks:
       - proxy
-
-  pma:
-    container_name: akka-pma
-    image: phpmyadmin
-    profiles:
-      - utils
-    environment:
-      PMA_ARBITRARY: 1
-      PMA_USER: root
-      PMA_PASSWORD: password
-      MYSQL_ROOT_PASSWORD: password
-      PMA_ABSOLUTE_URI: https://pma.akka.test
-      PMA_HOSTS: fof-db,extrakt-db,ca-db,installatorsforetagen-db,ng-db
-    networks:
-      - proxy
-    labels:
-      - traefik.http.routers.akka-pma.rule=Host(`pma.akka.test`)
-      - traefik.http.routers.akka-pma.tls=true
-      - traefik.http.routers.akka-pma.entrypoints=web,websecure
-
-
-

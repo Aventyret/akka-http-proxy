@@ -1,5 +1,7 @@
 include domains.mk
 
+CAROOT:=~/.akka/cert
+
 up: cert
 	docker compose up -d
 
@@ -12,13 +14,29 @@ restart:
 logs:
 	docker compose logs -f
 
-cert: .user/cert/akka-key.pem
 
-.user/cert/akka-key.pem: domains.mk
-	mkdir -p .user/cert
-	mkcert --key-file .user/cert/akka-key.pem  --cert-file .user/cert/akka-crt.pem $(DOMAINS)
+install:
+	CAROOT=$(CAROOT) mkcert -install
+
+
+info:
+	CAROOT=$(CAROOT) mkcert -CAROOT
+
+cert: ~/.akka/cert/rootCA-key.pem ~/.akka/cert/akka-key.pem
+
+ ~/.akka/cert/rootCA-key.pem:
+	mkdir -p ~/.akka/cert
+	CAROOT=$(CAROOT) mkcert -install
+
+~/.akka/cert/akka-key.pem: domains.mk
+	mkdir -p ~/.akka/cert
+	CAROOT=$(CAROOT) mkcert --key-file ~/.akka/cert/akka-key.pem  --cert-file ~/.akka/cert/akka-crt.pem $(DOMAINS)
 
 clean:
-	mkdir -p .user/cert
-	rm .user/cert/*.pem
+	mkdir -p ~/.akka/cert
+	rm ~/.akka/cert/akka*.pem
+
+clean_all:
+	mkdir -p ~/.akka/cert
+	rm ~/.akka/cert/*.pem
 
